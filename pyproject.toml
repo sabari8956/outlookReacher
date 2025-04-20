@@ -1,7 +1,13 @@
 [project]
 name = "outlookreacher"
 version = "0.1.0"
-description = "Add your description here"
+description = "A Microsoft Mail Authentication & Sending Bot"
 readme = "README.md"
-requires-python = ">=3.12"
-dependencies = []
+requires-python = ">=3.8"
+dependencies = [
+    "msal>=1.20.0",
+    "requests>=2.28.0",
+    "python-dotenv>=1.0.0",
+    "flask-session>=0.8.0",
+    "flask>=3.0.3",
+]
