@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Login - OutlookReacher{% endblock %}
+
+{% block content %}
+<div class="text-center mt-5">
+    <h1 class="display-4 mb-4">Welcome to OutlookReacher</h1>
+    <p class="lead mb-4">Sign in to start managing your email campaigns</p>
+    <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg">
+        <img src="https://static.vecteezy.com/system/resources/previews/027/127/592/original/microsoft-logo-microsoft-icon-transparent-free-png.png" alt="Microsoft" width="50" height="50" class="me-2">
+        Sign in with Microsoft
+    </a>
+</div>
+{% endblock %}

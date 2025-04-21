@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - OutlookReacher{% endblock %}
+
+{% block content %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white rounded-3 shadow-sm mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand">Welcome{% if user and user.get('displayName') %}, {{ user.get('displayName') }}{% endif %}!</span>
+        <div class="navbar-nav ms-auto">
+            <a href="{{ url_for('logout') }}" class="nav-link text-danger">Logout</a>
+        </div>
+    </div>
+</nav>
+
+<div class="tabs">
+    <button class="tab active" onclick="showTab('upload')">CSV Upload</button>
+    <button class="tab" onclick="showTab('email')">Email Campaign</button>
+    <button class="tab" onclick="showTab('visualization')">Visualization</button>
+</div>
+
+<div id="upload" class="tab-content active">
+    {% include 'partials/csv_upload.html' %}
+</div>
+
+<div id="email" class="tab-content">
+    {% include 'partials/email_campaign.html' %}
+</div>
+
+<div id="visualization" class="tab-content">
+    {% include 'partials/visualization.html' %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    function showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.classList.remove('active');
+        });
+        
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`.tab[onclick="showTab('${tabName}')"]`).classList.add('active');
+    }
+</script>
+{% endblock %}

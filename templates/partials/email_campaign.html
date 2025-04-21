@@ -1,0 +1,65 @@
+<!-- Email Campaign Section -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Email Campaign</h2>
+    </div>
+    <div class="card-body">
+        {% if csv_stats and csv_stats.email_column_suggestions %}
+            <form method="POST" action="{{ url_for('setup_campaign') }}">
+                <div class="form-group">
+                    <label class="form-label">Select Email Column</label>
+                    <select name="email_column" class="form-select" required>
+                        {% for col in csv_stats.email_column_suggestions %}
+                            <option value="{{ col.name }}">
+                                {{ col.name }} - {{ col.valid_count }} valid emails ({{ "%.1f"|format(col.percentage) }}%)
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="email-preview mt-4">
+                    <h4 class="h6 mb-3">Email Column Analysis</h4>
+                    {% for col in csv_stats.email_column_suggestions %}
+                        <div class="email-column">
+                            <h5 class="h6">{{ col.name }}</h5>
+                            <div class="progress-bar">
+                                <div class="fill" style="width: {{ col.percentage }}%"></div>
+                            </div>
+                            <p class="small text-muted">
+                                {{ col.valid_count }} valid emails out of {{ col.total_count }}
+                            </p>
+                            <div class="mt-2">
+                                <p class="small mb-1">Sample emails:</p>
+                                <ul class="list-unstyled">
+                                    {% for email in col.sample_emails %}
+                                        <li class="small text-muted">{{ email }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <div class="form-group mt-4">
+                    <label class="form-label">Subject</label>
+                    <input type="text" name="subject" class="form-control" required>
+                    <div class="form-text">Use {{column_name}} for dynamic content</div>
+                </div>
+
+                <div class="form-group mt-3">
+                    <label class="form-label">Message Template</label>
+                    <textarea name="template" rows="10" class="form-control" required></textarea>
+                    <div class="form-text">
+                        Use {{column_name}} for dynamic content. Available columns: {{ csv_columns | join(', ') }}
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Setup Campaign</button>
+            </form>
+        {% else %}
+            <div class="alert alert-warning">
+                Please upload a CSV file with email addresses first.
+            </div>
+        {% endif %}
+    </div>
+</div>

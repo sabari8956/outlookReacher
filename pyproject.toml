@@ -3,11 +3,15 @@ name = "outlookreacher"
 version = "0.1.0"
 description = "A Microsoft Mail Authentication & Sending Bot"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
     "msal>=1.20.0",
     "requests>=2.28.0",
     "python-dotenv>=1.0.0",
     "flask-session>=0.8.0",
     "flask>=3.0.3",
+    "pandas>=2.2.0",
+    "plotly>=5.19.0",
+    "flask-wtf>=1.2.1",
+    "werkzeug>=3.0.1"
 ]

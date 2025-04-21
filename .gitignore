@@ -11,3 +11,4 @@ wheels/
 .env
 
 flask_session/
+uploads/

@@ -1,0 +1,19 @@
+<!-- Visualization Section -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Data Visualization</h2>
+    </div>
+    <div class="card-body">
+        {% if plots %}
+            {% for plot in plots %}
+                <div class="visualization">
+                    {{ plot | safe }}
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="alert alert-info">
+                Upload CSV data to see visualizations. The system will automatically generate charts for numeric columns.
+            </div>
+        {% endif %}
+    </div>
+</div>

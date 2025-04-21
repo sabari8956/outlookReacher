@@ -1,123 +1,49 @@
-# OutlookReacher
+OutlookReacher Enhancement Plan
+Here's a detailed plan to enhance your application with CSV processing, email automation, and data visualization capabilities:
+1. CSV Upload and Processing Feature
 
-A Python-based Microsoft Mail Authentication & Sending Bot that allows sending emails through Microsoft Graph API.
+Create a new route and form for CSV uploads
+Add CSV parsing functionality using pandas
+Implement validation for CSV data structure
+Store processed CSV data in session or database
+Create a preview interface to display uploaded data
 
-## Prerequisites
+2. Email Template System
 
-- Python 3.8 or higher
-- A Microsoft Azure account
-- Basic knowledge of Flask and web applications
+Develop a template management system
+Add ability to create HTML email templates with variable placeholders
+Implement template preview functionality
+Create a template selection option for emails
+Support dynamic variable replacement using CSV data
 
-## Step 1: Initial Setup
+3. Batch Email Processing
 
-1. Clone this repository:
-   ```bash
-   git clone [your-repo-url]
-   cd OutlookReacher
-   ```
+Add functionality to select recipient column from CSV
+Create batch email sending queue
+Implement progress tracking for batch sends
+Add rate limiting to prevent API throttling
+Develop error handling for failed sends
 
-2. Install dependencies using uv:
-   ```bash
-   uv venv
-   uv pip install flask msal requests python-dotenv
-   ```
+4. Data Visualization
 
-## Step 2: Microsoft Azure Setup
+Integrate a charting library (Chart.js or D3.js)
+Create visualizations of email campaign metrics
+Add dashboard for campaign statistics
+Implement real-time tracking of email opens/clicks
+Develop exportable reports of campaign results
 
-1. Go to [Azure Portal](https://portal.azure.com)
-2. Navigate to Azure Active Directory > App registrations > New registration
-3. Register a new application:
-   - Name: OutlookReacher (or your preferred name)
-   - Supported account types: Select "Accounts in any organizational directory and personal Microsoft accounts"
-   - Redirect URI: http://localhost:5000/auth-callback
+5. User Interface Enhancements
 
-4. After registration, note down:
-   - Application (client) ID
-   - Directory (tenant) ID
+Redesign the main dashboard with separate sections
+Add navigation between different features
+Implement responsive design for mobile compatibility
+Create a wizard interface for campaign setup
+Add confirmation dialogs for important actions
 
-5. Create a client secret:
-   - Go to Certificates & secrets > New client secret
-   - Note down the generated secret value
+6. Database Integration
 
-6. Configure API permissions:
-   - Go to API permissions
-   - Add Microsoft Graph permissions:
-     - Mail.Send
-     - User.Read
-   - Click "Grant admin consent"
-
-## Step 3: Environment Configuration
-
-1. Create a `.env` file in the project root:
-   ```env
-   AZURE_CLIENT_ID=your_client_id
-   AZURE_CLIENT_SECRET=your_client_secret
-   AZURE_TENANT_ID=your_tenant_id
-   FLASK_SECRET_KEY=your_random_secret_key
-   ```
-
-## Step 4: Running the Application
-
-1. Start the Flask application:
-   ```bash
-   python main.py
-   ```
-
-2. Open your browser and navigate to:
-   ```
-   http://localhost:5000
-   ```
-
-## Step 5: Authentication Flow
-
-1. Click "Sign in with Microsoft"
-2. You'll be redirected to Microsoft's login page
-3. Enter your Microsoft account credentials
-4. Grant the requested permissions
-5. You'll be redirected back to the dashboard
-
-## Step 6: Using the Email Sender
-
-1. From the dashboard, navigate to "Compose Email"
-2. Fill in the required fields:
-   - Recipient(s) email address
-   - Subject
-   - HTML content for the email body
-3. Click "Send Email"
-4. Check the success/failure notification
-
-## Features
-
-- Microsoft OAuth2 authentication
-- Secure token storage and refresh
-- HTML email support
-- Multiple recipient support
-- Error handling and notifications
-- Responsive UI
-
-## Security Notes
-
-- Never commit your `.env` file
-- Store tokens securely
-- Implement rate limiting for production use
-- Use HTTPS in production
-
-## Troubleshooting
-
-1. Authentication Issues:
-   - Verify Azure app registration settings
-   - Check redirect URI configuration
-   - Ensure all required permissions are granted
-
-2. Email Sending Issues:
-   - Verify token validity
-   - Check recipient email format
-   - Review HTML content formatting
-
-## Contributing
-
-Feel free to open issues or submit pull requests to improve this project.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Set up a database (SQLite, PostgreSQL, or MongoDB)
+Create models for users, templates, campaigns, and contacts
+Implement data persistence across sessions
+Add user authentication with database storage
+Implement data backup/recovery options

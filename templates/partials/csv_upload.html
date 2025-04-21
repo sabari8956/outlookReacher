@@ -1,0 +1,42 @@
+<!-- CSV Upload Section -->
+<div class="card">
+    <div class="card-header">
+        <h2 class="h5 mb-0">Upload CSV</h2>
+    </div>
+    <div class="card-body">
+        <form method="POST" action="{{ url_for('upload_csv') }}" enctype="multipart/form-data" class="mb-4">
+            {{ form.csrf_token }}
+            <div class="form-group">
+                {{ form.csv_file.label(class="form-label") }}
+                {{ form.csv_file(class="form-control") }}
+                <div class="form-text">Upload a CSV file containing email addresses and other data.</div>
+            </div>
+            <div class="form-group mt-3">
+                {{ form.delimiter.label(class="form-label") }}
+                {{ form.delimiter(class="form-select") }}
+                <div class="form-text">Select the delimiter used in your CSV file, or let the system detect it automatically.</div>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Upload CSV</button>
+        </form>
+
+        {% if csv_stats %}
+            <div class="alert alert-info">
+                <h4 class="alert-heading">File Statistics</h4>
+                <p>Total Records: {{ csv_stats.total_rows }}</p>
+                <p>Delimiter Used: {{ csv_stats.delimiter_used }}</p>
+                {% if csv_stats.delimiter_used != form.delimiter.data and form.delimiter.data != 'auto' %}
+                    <div class="alert alert-warning">
+                        Note: Auto-detected delimiter ({{ csv_stats.delimiter_used }}) differs from selected delimiter ({{ form.delimiter.data }})
+                    </div>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        {% if csv_data is not none %}
+            <div class="csv-preview">
+                <h3 class="h5 mb-3">CSV Preview</h3>
+                {{ csv_data | safe }}
+            </div>
+        {% endif %}
+    </div>
+</div>
