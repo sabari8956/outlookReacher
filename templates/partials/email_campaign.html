@@ -1,14 +1,17 @@
 <!-- Email Campaign Section -->
 <div class="card">
-    <div class="card-header">
+    <div class="card-header d-flex justify-content-between align-items-center">
         <h2 class="h5 mb-0">Email Campaign</h2>
+        <button type="button" class="btn btn-sm btn-outline-primary" onclick="showVariableHelper()">
+            <i class="bi bi-lightbulb"></i> Show Variable Helper
+        </button>
     </div>
     <div class="card-body">
         {% if csv_stats and csv_stats.email_column_suggestions %}
-            <form method="POST" action="{{ url_for('setup_campaign') }}">
+            <form method="POST" action="{{ url_for('setup_campaign') }}" id="campaignForm">
                 <div class="form-group">
                     <label class="form-label">Select Email Column</label>
-                    <select name="email_column" class="form-select" required>
+                    <select name="email_column" class="form-select" required onchange="updatePreview()">
                         {% for col in csv_stats.email_column_suggestions %}
                             <option value="{{ col.name }}">
                                 {{ col.name }} - {{ col.valid_count }} valid emails ({{ "%.1f"|format(col.percentage) }}%)
@@ -17,45 +20,225 @@
                     </select>
                 </div>
 
-                <div class="email-preview mt-4">
-                    <h4 class="h6 mb-3">Email Column Analysis</h4>
-                    {% for col in csv_stats.email_column_suggestions %}
-                        <div class="email-column">
-                            <h5 class="h6">{{ col.name }}</h5>
-                            <div class="progress-bar">
-                                <div class="fill" style="width: {{ col.percentage }}%"></div>
+                <!-- Variable Helper Modal -->
+                <div class="modal fade" id="variableHelperModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Available Variables</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                             </div>
-                            <p class="small text-muted">
-                                {{ col.valid_count }} valid emails out of {{ col.total_count }}
-                            </p>
-                            <div class="mt-2">
-                                <p class="small mb-1">Sample emails:</p>
-                                <ul class="list-unstyled">
-                                    {% for email in col.sample_emails %}
-                                        <li class="small text-muted">{{ email }}</li>
-                                    {% endfor %}
-                                </ul>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Column Variables</h6>
+                                        <div class="list-group">
+                                            {% for col in csv_columns %}
+                                            <button type="button" class="list-group-item list-group-item-action variable-item" 
+                                                    onclick="insertVariable('{{col}}')">
+                                                {{col}}
+                                                <small class="text-muted d-block">Example: {{ csv_stats.sample_values[col] if csv_stats.sample_values else '' }}</small>
+                                            </button>
+                                            {% endfor %}
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Common Templates</h6>
+                                        <div class="list-group">
+                                            <button type="button" class="list-group-item list-group-item-action template-item"
+                                                    onclick="insertTemplate('greeting')">
+                                                Greeting
+                                                <small class="text-muted d-block">Hello {{"{{"}}Name{{"}}"}},</small>
+                                            </button>
+                                            <button type="button" class="list-group-item list-group-item-action template-item"
+                                                    onclick="insertTemplate('signature')">
+                                                Signature
+                                                <small class="text-muted d-block">Best regards,<br>{{"{{"}}user.displayName{{"}}"}}</small>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    {% endfor %}
+                    </div>
                 </div>
 
                 <div class="form-group mt-4">
                     <label class="form-label">Subject</label>
-                    <input type="text" name="subject" class="form-control" required>
-                    <div class="form-text">Use {{column_name}} for dynamic content</div>
+                    <div class="input-group">
+                        <input type="text" name="subject" class="form-control" required id="subjectInput" 
+                               oninput="updatePreview()" placeholder="Enter email subject">
+                        <button type="button" class="btn btn-outline-secondary" onclick="showVariableHelper()">
+                            Add Variable
+                        </button>
+                    </div>
+                    <div id="subjectPreview" class="form-text mt-2"></div>
                 </div>
 
                 <div class="form-group mt-3">
                     <label class="form-label">Message Template</label>
-                    <textarea name="template" rows="10" class="form-control" required></textarea>
-                    <div class="form-text">
-                        Use {{column_name}} for dynamic content. Available columns: {{ csv_columns | join(', ') }}
+                    <div class="position-relative">
+                        <textarea name="template" rows="10" class="form-control" required id="templateInput"
+                                oninput="updatePreview()" placeholder="Enter your email template here..."></textarea>
+                        <div class="position-absolute top-0 end-0 m-2">
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="showVariableHelper()">
+                                Add Variable
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card mt-3">
+                        <div class="card-header">
+                            <h6 class="mb-0">Live Preview</h6>
+                        </div>
+                        <div class="card-body">
+                            <div id="templatePreview" class="border p-3 rounded bg-light"></div>
+                        </div>
                     </div>
                 </div>
 
                 <button type="submit" class="btn btn-primary mt-3">Setup Campaign</button>
             </form>
+
+            <script>
+                let lastCursorPosition = 0;
+                let activeField = null;
+
+                function showVariableHelper() {
+                    const modal = new bootstrap.Modal(document.getElementById('variableHelperModal'));
+                    modal.show();
+                }
+
+                function insertVariable(variable) {
+                    const varText = `\{\{${variable}\}\}`;
+                    if (activeField) {
+                        const startPos = activeField.selectionStart;
+                        const endPos = activeField.selectionEnd;
+                        const text = activeField.value;
+                        activeField.value = text.substring(0, startPos) + varText + text.substring(endPos);
+                        activeField.focus();
+                        activeField.selectionStart = startPos + varText.length;
+                        activeField.selectionEnd = startPos + varText.length;
+                        updatePreview();
+                    }
+                }
+
+                function insertTemplate(type) {
+                    const templates = {
+                        greeting: "Hello \{\{Name\}\},\n\n",
+                        signature: "\n\nBest regards,\n\{\{user.displayName\}\}"
+                    };
+                    
+                    if (activeField && templates[type]) {
+                        const startPos = activeField.selectionStart;
+                        const endPos = activeField.selectionEnd;
+                        const text = activeField.value;
+                        activeField.value = text.substring(0, startPos) + templates[type] + text.substring(endPos);
+                        updatePreview();
+                    }
+                }
+
+                function updatePreview() {
+                    const subjectInput = document.getElementById('subjectInput');
+                    const templateInput = document.getElementById('templateInput');
+                    const subjectPreview = document.getElementById('subjectPreview');
+                    const templatePreview = document.getElementById('templatePreview');
+
+                    // Get the first row of data for preview
+                    const sampleData = {{ csv_stats.sample_data | tojson | safe if csv_stats.sample_data else '{}' }};
+                    
+                    let subject = subjectInput.value;
+                    let template = templateInput.value;
+
+                    // Highlight variables in preview
+                    Object.keys(sampleData).forEach(key => {
+                        const value = sampleData[key];
+                        const regex = new RegExp(`\{\{${key}\}\}`, 'g');
+                        subject = subject.replace(regex, `<span class="text-success">${value}</span>`);
+                        template = template.replace(regex, `<span class="text-success">${value}</span>`);
+                    });
+
+                    // Update previews with sanitized HTML
+                    subjectPreview.innerHTML = subject ? `Preview: ${subject}` : '';
+                    
+                    // Create a temporary div to parse HTML content
+                    const parser = new DOMParser();
+                    const doc = parser.parseFromString(template, 'text/html');
+                    
+                    // Apply styles to preview
+                    templatePreview.innerHTML = '';
+                    const previewStyles = document.createElement('style');
+                    previewStyles.textContent = `
+                        .preview-content {
+                            font-family: inherit;
+                            line-height: 1.5;
+                        }
+                        .preview-content * {
+                            max-width: 100%;
+                        }
+                        .preview-content img {
+                            height: auto;
+                        }
+                        .preview-content table {
+                            border-collapse: collapse;
+                            width: 100%;
+                        }
+                        .preview-content td, .preview-content th {
+                            border: 1px solid #ddd;
+                            padding: 8px;
+                        }
+                    `;
+                    templatePreview.appendChild(previewStyles);
+                    
+                    // Create preview container
+                    const previewContent = document.createElement('div');
+                    previewContent.className = 'preview-content';
+                    previewContent.innerHTML = doc.body.innerHTML;
+                    templatePreview.appendChild(previewContent);
+                }
+
+                // Initialize Bootstrap components
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Initialize tooltips
+                    const tooltips = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+                    tooltips.forEach(tooltip => new bootstrap.Tooltip(tooltip));
+                });
+
+                // Track active field
+                document.getElementById('subjectInput').onfocus = function() { activeField = this; }
+                document.getElementById('templateInput').onfocus = function() { activeField = this; }
+
+                // Initialize preview
+                updatePreview();
+            </script>
+
+            <style>
+                .variable-item:hover, .template-item:hover {
+                    background-color: #f8f9fa;
+                    cursor: pointer;
+                }
+                #templatePreview {
+                    min-height: 100px;
+                    padding: 15px;
+                    background: white;
+                    border: 1px solid #dee2e6;
+                    border-radius: 4px;
+                }
+                .text-success {
+                    background-color: #d4edda;
+                    padding: 2px 4px;
+                    border-radius: 3px;
+                }
+                .preview-content {
+                    overflow-wrap: break-word;
+                    word-wrap: break-word;
+                }
+                .template-helper {
+                    position: absolute;
+                    right: 10px;
+                    top: 10px;
+                    z-index: 100;
+                }
+            </style>
         {% else %}
             <div class="alert alert-warning">
                 Please upload a CSV file with email addresses first.

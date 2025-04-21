@@ -115,7 +115,9 @@ def process_csv(filepath, selected_delimiter='auto'):
                 'email_columns': {},
                 'valid_emails': {},
                 'invalid_emails': {},
-                'email_column_suggestions': []
+                'email_column_suggestions': [],
+                'sample_data': df.iloc[0].to_dict() if len(df) > 0 else {},  # Add first row as sample
+                'sample_values': {col: str(df[col].iloc[0]) if len(df) > 0 else '' for col in df.columns}  # Add sample values for each column
             }
             
             # Function to check if a value might be an email
